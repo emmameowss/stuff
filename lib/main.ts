@@ -279,7 +279,7 @@ export async function reviveConfessions(repository: Repository<Confession>) {
 
 
 function createStagingBlocks(id: number, text: string, uid: string): TextSection[] {
-  let chunks = [`(staging) *${id}* | UID: \\`${uid}\\``];
+  let chunks = [`(staging) *${id}* | UID: \`${uid}\``];
   const words = text.split(" ");
   for (const word of words) {
     if (chunks[chunks.length - 1].length + word.length + 1 < 3000) {
@@ -290,8 +290,7 @@ function createStagingBlocks(id: number, text: string, uid: string): TextSection
       chunks.push(word);
     }
   }
-    return chunks.map((chunk) => new TextSection(new MarkdownText(chunk)));
-    let chunks = [`(staging) *${id}* | UID: \`${uid}\``];
+  return chunks.map((chunk) => new TextSection(new MarkdownText(chunk)));
 }
 
 const getStagingMessageBlocks = (id: number, text: string, uid: string) => new Blocks([
