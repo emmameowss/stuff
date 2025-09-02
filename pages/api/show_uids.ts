@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import path from "path";
 import fs from "fs";
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default function handler(_: NextApiRequest, res: NextApiResponse) {
   const uidsPath = path.join(process.cwd(), "lib", "uids.json");
   let uids: string[] = [];
   try {
