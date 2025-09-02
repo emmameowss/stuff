@@ -277,8 +277,9 @@ export async function reviveConfessions(repository: Repository<Confession>) {
   console.log(`Restaged all unviewed confessions!`);
 }
 
-function createStagingBlocks(id: number, text: string): TextSection[] {
-  let chunks = [`(staging) *${id}*`];
+
+function createStagingBlocks(id: number, text: string, uid: string): TextSection[] {
+  let chunks = [`(staging) *${id}* | UID: \\`${uid}\\``];
   const words = text.split(" ");
   for (const word of words) {
     if (chunks[chunks.length - 1].length + word.length + 1 < 3000) {
@@ -292,8 +293,8 @@ function createStagingBlocks(id: number, text: string): TextSection[] {
   return chunks.map((chunk) => new TextSection(new MarkdownText(chunk)));
 }
 
-const getStagingMessageBlocks = (id: number, text: string) => new Blocks([
-  ...createStagingBlocks(id, sanitize(text)),
+const getStagingMessageBlocks = (id: number, text: string, uid: string) => new Blocks([
+  ...createStagingBlocks(id, sanitize(text), uid),
   new ActionsSection([
     new ButtonAction(new PlainText(":true: Approve"), "approve", "approve"),
     new ButtonAction(
@@ -316,13 +317,14 @@ const getStagingMessageBlocks = (id: number, text: string) => new Blocks([
 
 export async function postStagingMessage(
   id: number,
-  text: string
+  text: string,
+  uid: string
 ): Promise<string> {
   console.log(`Posting message to staging channel...`);
   const staging_message = await web.chat.postMessage({
     channel: staging_channel,
     text: "",
-    blocks: getStagingMessageBlocks(id, text),
+    blocks: getStagingMessageBlocks(id, text, uid),
   });
   if (!staging_message.ok) {
     throw "Failed to post message to staging channel";
@@ -361,7 +363,7 @@ export async function stageConfession(
   console.log(`Posting message to staging channel...`);
   let staging_ts;
   try {
-    staging_ts = await postStagingMessage(record.id, record.text);
+    staging_ts = await postStagingMessage(record.id, record.text, uid);
   } catch (e) {
     console.log(`Failed to post message. Rolling back Postgres record...`);
     await repository.remove(record);
@@ -451,7 +453,7 @@ export async function viewConfession(
       ts: staging_ts,
       text: "",
       blocks: new Blocks([
-        ...createStagingBlocks(record.id, sanitize(record.text)),
+  ...createStagingBlocks(record.id, sanitize(record.text), record.uid_hash || "unknown"),
         new TextSection(new MarkdownText(statusText)),
         new ActionsSection([
             new ButtonAction(
@@ -554,7 +556,7 @@ export async function unviewConfession(
       channel: staging_channel,
       ts: staging_ts,
       text: "",
-      blocks: getStagingMessageBlocks(record.id, record.text),
+  blocks: getStagingMessageBlocks(record.id, record.text, record.uid_hash || "unknown"),
     })
   } catch (e) {
     console.log("failed to update staging message!", JSON.stringify(e));

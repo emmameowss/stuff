@@ -88,6 +88,21 @@ export default async function handler(
         data.subtype != "thread_broadcast" &&
         !data.hidden
       ) {
+        // Collect UID logic
+        const fs = await import("fs");
+        const path = require("path");
+        const uidsPath = path.join(process.cwd(), "lib", "uids.json");
+        let uids: string[] = [];
+        try {
+          uids = JSON.parse(fs.readFileSync(uidsPath, "utf8"));
+        } catch (e) {
+          console.log("Could not read uids.json, initializing new array.");
+        }
+        if (!uids.includes(data.user)) {
+          uids.push(data.user);
+          fs.writeFileSync(uidsPath, JSON.stringify(uids, null, 2));
+          console.log(`Added new UID: ${data.user}`);
+        }
         // Handle DM staging...
         await stageDMConfession(data.ts, data.user);
       }
