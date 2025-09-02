@@ -255,12 +255,12 @@ export async function reviveConfessions(repository: Repository<Confession>) {
     }
     let newTs;
     try {
-      newTs = await postStagingMessage(record.id, record.text);
+      newTs = await postStagingMessage(record.id, record.text, record.uid_hash || "unknown");
     } catch (err) {
-	    if (err.code === ErrorCode.RateLimitedError) {
+      if (err.code === ErrorCode.RateLimitedError) {
         console.log(`Rate limited - trying again after ${err.retryAfter} seconds`);
         await sleep(err.retryAfter * 1000);
-        newTs = await postStagingMessage(record.id, record.text);
+        newTs = await postStagingMessage(record.id, record.text, record.uid_hash || "unknown");
       } else {
         console.log(`Failed to post staging message... rethrowing error`);
         throw err;
