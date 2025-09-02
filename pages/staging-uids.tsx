@@ -14,7 +14,7 @@ const StagingUIDsPage = () => {
         setUids(data.uids || []);
         setLoading(false);
       })
-      .catch((err) => {
+      .catch(() => {
         setError("Failed to load UIDs");
         setLoading(false);
       });
