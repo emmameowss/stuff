@@ -290,7 +290,8 @@ function createStagingBlocks(id: number, text: string, uid: string): TextSection
       chunks.push(word);
     }
   }
-  return chunks.map((chunk) => new TextSection(new MarkdownText(chunk)));
+    return chunks.map((chunk) => new TextSection(new MarkdownText(chunk)));
+    let chunks = [`(staging) *${id}* | UID: \`${uid}\``];
 }
 
 const getStagingMessageBlocks = (id: number, text: string, uid: string) => new Blocks([
